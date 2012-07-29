@@ -1,14 +1,10 @@
 package eod.event;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.inject.Singleton;
-
-import eod.OrdinalMap;
 
 /**
  * An {@link EventManager} which uses reflection to both
@@ -18,35 +14,35 @@ import eod.OrdinalMap;
  * @see {@link AbstractEventManager}
  * @version 1.0 - Added support for cancellation
  * @version 1.1 - Added support for priorities
+ * @version 1.1.5 - Added <i> Google Guice</i> default {@link Singleton} binding
+ * @version 1.2 - Significant speed improvements
  */
 @Singleton
 public class ReflectiveEventManager extends AbstractEventManager {
 
 	@Override
 	public void dispatchEvent(Event event) {
-		OrdinalMap<Map<Method, EventListener>> priorityMap = getRegistry().get(event.getClass());
-
-		if (priorityMap != null) {
-			CancellableEvent cancellableEvent = null;
-			boolean cancellable;
-			if (cancellable = event instanceof CancellableEvent) {
-				cancellableEvent = (CancellableEvent) event;
-				if (cancellableEvent.isCancelled()) return;
-			}
-
-			try {
-				for (Entry<Integer, Map<Method, EventListener>> entry : priorityMap.entrySet()) {
-					for (Entry<Method, EventListener> mapping : entry.getValue().entrySet()) {
-						if (mapping.getKey().getAnnotation(EventHandler.class).priority().ordinal() == entry.getKey()) {
-							mapping.getKey().invoke(mapping.getValue(), event);
-							if (cancellable && cancellableEvent.isCancelled()) return;
-						}
-					}
-				}
-			} catch (InvocationTargetException | IllegalAccessException e) {
-				e.printStackTrace();
+		CancellableEvent cancellableEvent = null;
+		boolean cancellable;
+		if (cancellable = event instanceof CancellableEvent) {
+			cancellableEvent = (CancellableEvent) event;
+			if (cancellableEvent.isCancelled()) {
+				return;
 			}
 		}
+
+		try {
+			for (EventPriority priority : EventPriority.values()) {
+				Map<Method, EventListener> internalMapping = getRegistry().getMethodMap(event.getClass(), priority);
+				if (internalMapping == null) continue;
+				for (Entry<Method, EventListener> entry : internalMapping.entrySet()) {
+					entry.getKey().invoke(entry.getValue(), event);
+					if (cancellable && cancellableEvent.isCancelled()) {
+						return;
+					}
+				}
+			}
+		} catch (Exception e) { e.printStackTrace(); }
 	}
 
 	@Override
@@ -58,19 +54,7 @@ public class ReflectiveEventManager extends AbstractEventManager {
 				if (parameters.length == 1) {
 					@SuppressWarnings("unchecked")
 					Class<? extends Event> event = (Class<? extends Event>) parameters[0];
-					EventPriority priority = handler.priority();
-
-					OrdinalMap<Map<Method, EventListener>> priorityMap = getRegistry().get(event);
-					if (priorityMap == null) {
-						priorityMap = new OrdinalMap<Map<Method, EventListener>>(EventPriority.class, (Map<Method, EventListener>) new HashMap<Method, EventListener>());
-					}
-
-					Map<Method, EventListener> methodMap = priorityMap.get(priority.ordinal());
-
-					methodMap.put(method, listener);
-					priorityMap.put(priority.ordinal(), methodMap);
-
-					getRegistry().put(event, priorityMap);
+					getRegistry().register(event, handler.priority(), method, listener);
 				}
 			}
 		}
