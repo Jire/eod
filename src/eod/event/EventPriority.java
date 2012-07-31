@@ -1,7 +1,5 @@
 package eod.event;
 
-import eod.NotImplemented;
-
 /**
  * Represents an event handler's authority
  * to the final state of the event in which
@@ -9,7 +7,6 @@ import eod.NotImplemented;
  * 
  * @author Thomas G. P. Nappo
  */
-@NotImplemented
 public enum EventPriority {
 
 	/*

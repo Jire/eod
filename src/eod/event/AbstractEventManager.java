@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 /**
  * An abstract implementation of {@link EventManager}
- * which simply provides a registry for the event system.
+ * which provides an {@link EventRegistry} for use.
  * 
  * @author Thomas G. P. Nappo
  */
