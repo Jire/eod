@@ -26,7 +26,7 @@ import eod.predicate.Predicates;
  * @version 1.3 - Modified to use {@link Predicates}
  */
 @Singleton
-public class ReflectiveEventManager extends AbstractEventManager {
+public final class ReflectiveEventManager extends AbstractEventManager {
 
 	@Override
 	public void dispatchEvent(Event event) {
@@ -47,6 +47,14 @@ public class ReflectiveEventManager extends AbstractEventManager {
 				if (internalMapping != null) {
 					for (Entry<Method, EventListener> entry : internalMapping.entrySet()) {
 						entry.getKey().invoke(entry.getValue(), event);
+						/*
+						 * Immediately return in the case of the event being
+						 * cancelled. Implementing the "ignoreCancelled" feature
+						 * will allow greater flexibility.
+						 * 
+						 * Plan: Have prior iteration of "ignoreCancelled" handlers,
+						 * with a separate registry.
+						 */
 						if (cancellable && cancellableEvent.isCancelled()) {
 							return;
 						}
@@ -64,6 +72,11 @@ public class ReflectiveEventManager extends AbstractEventManager {
 		checkNotNull(listener);
 
 		for (Method method : filter(listener.getClass().getMethods(), isEventHandler)) {
+			/*
+			 * Unchecked cast suppressed because it is better to throw an
+			 * exception, as it clearly signals something is wrong with the
+			 * specified event handler.
+			 */
 			getRegistry().register((Class<? extends Event>) method.getParameterTypes()[0],
 					method.getAnnotation(EventHandler.class).priority(), method, listener);
 		}
@@ -72,7 +85,7 @@ public class ReflectiveEventManager extends AbstractEventManager {
 	/**
 	 * A predicates which evaluates a method to verify it is a valid {@link EventHandler}.
 	 */
-	protected static final Predicate<Method> isEventHandler = new Predicate<Method>() {
+	static final Predicate<Method> isEventHandler = new Predicate<Method>() {
 		@Override
 		public boolean evaluate(Method input) {
 			return input.isAnnotationPresent(EventHandler.class) && input.getParameterTypes().length == 1;
