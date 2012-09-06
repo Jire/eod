@@ -7,6 +7,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PACKAGE;
 import static java.lang.annotation.ElementType.TYPE;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.Target;
 
 /**
@@ -18,5 +19,6 @@ import java.lang.annotation.Target;
  * 
  * @author Thomas G. P. Nappo
  */
+@Documented
 @Target({ ANNOTATION_TYPE, CONSTRUCTOR, FIELD, METHOD, TYPE, PACKAGE })
 public @interface Experimental {}

@@ -21,6 +21,7 @@ public final class Predicates {
 	 * that will be filtered and used as the result.
 	 * @param predicate The predicate to use for evaluation.
 	 * @return An iterable containing all objects which passed the predicate's evaluation.
+	 * @throws NullPointerException If <tt>unfiltered</tt> or <tt>predicate</tt> are <tt>null</tt>.
 	 */
 	public static <T> Iterable<T> filter(Iterable<T> unfiltered, Predicate<T> predicate) {
 		checkNotNull(unfiltered);
@@ -44,13 +45,14 @@ public final class Predicates {
 	 * that will be filtered and used as the result.
 	 * @param predicate The predicate to use for evaluation.
 	 * @return An iterable containing all objects which passed the predicate's evaluation.
+	 * @throws NullPointerException If <tt>unfiltered</tt> or <tt>predicate</tt> are <tt>null</tt>.
 	 */
 	public static <T> Iterable<T> filter(T[] unfiltered, Predicate<T> predicate) {
 		return filter(Arrays.asList(unfiltered), predicate);
 	}
 
 	/**
-	 * Predicates is a static-method-only class
+	 * Predicates is a static-utility class
 	 * and should therefore never be constructed.
 	 * 
 	 * @throws UnsupportedOperationException If construction occurs.

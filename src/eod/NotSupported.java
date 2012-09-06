@@ -1,10 +1,13 @@
 package eod;
 
+import java.lang.annotation.Documented;
+
 /**
  * Used to mark something to not support a type.
  * 
  * @author Thomas G. P. Nappo
  */
+@Documented
 public @interface NotSupported {
 
 	/**

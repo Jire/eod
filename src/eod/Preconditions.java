@@ -37,7 +37,7 @@ public final class Preconditions {
 	}
 
 	/**
-	 * Preconditions is a static-method-only class
+	 * Preconditions is a static-utility class
 	 * and should therefore never be constructed.
 	 * 
 	 * @throws UnsupportedOperationException If construction occurs.
