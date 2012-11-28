@@ -1,1 +1,1 @@
-_EoD_ development has ended and a new library has taken its place: [Mint](https://github.com/Canownueasy/mint)
+_EoD_ development has ended and a new library has taken its place: [Mint](https://github.com/Jire/mint)
